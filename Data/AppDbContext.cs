@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WebApiUser.Models;
 
 namespace WebApiUser.Data
 {
@@ -7,5 +8,6 @@ namespace WebApiUser.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
+        public DbSet<UsuarioModel> Usuarios { get; set; }
     }
 }
