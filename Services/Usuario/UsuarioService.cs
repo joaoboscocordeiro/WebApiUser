@@ -66,9 +66,33 @@ namespace WebApiUser.Services.Usuario
             }
         }
 
-        public Task<ResponseModel<UsuarioModel>> RegistrarUsuario(UsuarioCriacaoDto criacaoCriacaoDto)
+        public async Task<ResponseModel<UsuarioModel>> RemoverUsuario(int id)
         {
-            throw new NotImplementedException();
+            ResponseModel<UsuarioModel> response = new ResponseModel<UsuarioModel>();
+
+            try
+            {
+                var usuario = await _context.Usuarios.FindAsync(id);
+
+                if (usuario == null)
+                {
+                    response.Mensagem = "Usuário não localizado!";
+                    return response;
+                }
+
+                _context.Remove(usuario);
+                await _context.SaveChangesAsync();
+
+                response.Mensagem = $"Usuários {usuario.Nome} Removido com Sucesso!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Mensagem = ex.Message;
+                response.Status = false;
+                return response;
+            }
+
         }
     }
 }
