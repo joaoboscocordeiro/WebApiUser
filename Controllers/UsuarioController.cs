@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WebApiUser.Dtos.Usuario;
 using WebApiUser.Services.Usuario;
 
 namespace WebApiUser.Controllers
@@ -31,6 +32,13 @@ namespace WebApiUser.Controllers
         public async Task<IActionResult> RemoverUsuario(int id)
         {
             var usuario = await _usuarioInterface.RemoverUsuario(id);
+            return Ok(usuario);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> EditarUsuario(UsuarioEdicaoDto usuarioEdicaoDto)
+        {
+            var usuario = await _usuarioInterface.EditarUsuario(usuarioEdicaoDto);
             return Ok(usuario);
         }
     }

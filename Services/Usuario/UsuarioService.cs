@@ -1,17 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using WebApiUser.Data;
 using WebApiUser.Dtos.Usuario;
 using WebApiUser.Models;
+using WebApiUser.Services.Senha;
 
 namespace WebApiUser.Services.Usuario
 {
     public class UsuarioService : IUsuarioInterface
     {
         private readonly AppDbContext _context;
+        private readonly ISenhaInterface _senhaInterface;
+        private readonly IMapper _mapper;
 
-        public UsuarioService(AppDbContext context)
+        public UsuarioService(AppDbContext context, ISenhaInterface senhaInterface, IMapper mapper)
         {
             _context = context;
+            _senhaInterface = senhaInterface;
+            _mapper = mapper;
         }
 
         public async Task<ResponseModel<UsuarioModel>> BuscarUsuarioPorId(int id)
@@ -40,6 +46,41 @@ namespace WebApiUser.Services.Usuario
             }
         }
 
+        public async Task<ResponseModel<UsuarioModel>> EditarUsuario(UsuarioEdicaoDto usuarioEdicaoDto)
+        {
+            ResponseModel<UsuarioModel> response = new ResponseModel<UsuarioModel>();
+
+            try
+            {
+                var usuarioDB = await _context.Usuarios.FindAsync(usuarioEdicaoDto.Id);
+
+                if (usuarioDB == null)
+                {
+                    response.Mensagem = "Usuário não localizado!";
+                    return response;
+                }
+
+                usuarioDB.Usuario = usuarioEdicaoDto.Usuario;
+                usuarioDB.Nome = usuarioEdicaoDto.Nome;
+                usuarioDB.Sobrenome = usuarioEdicaoDto.Sobrenome;
+                usuarioDB.Email = usuarioEdicaoDto.Email;
+                usuarioDB.DataAlteracao = DateTime.Now;
+
+                _context.Update(usuarioDB);
+                await _context.SaveChangesAsync();
+
+                response.Mensagem = $"Usuário {usuarioDB.Nome} editado com sucesso!";
+                response.Dados = usuarioDB;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Mensagem = ex.Message;
+                response.Status = false;
+                return response;
+            }
+        }
+
         public async Task<ResponseModel<List<UsuarioModel>>> ListarUsuarios()
         {
             ResponseModel<List<UsuarioModel>> response = new ResponseModel<List<UsuarioModel>>();
@@ -56,6 +97,40 @@ namespace WebApiUser.Services.Usuario
 
                 response.Dados = usuarios;
                 response.Mensagem = "Usuários localizados!";
+                return response;
+            }
+            catch (Exception ex)
+            {
+                response.Mensagem = ex.Message;
+                response.Status = false;
+                return response;
+            }
+        }
+
+        public async Task<ResponseModel<UsuarioModel>> RegistrarUsuario(UsuarioCriacaoDto usuarioCriacaoDto)
+        {
+            ResponseModel<UsuarioModel> response = new ResponseModel<UsuarioModel>();
+
+            try
+            {
+                if (!VerificaSeExisteEmailUsuarioRepetidos(usuarioCriacaoDto))
+                {
+                    response.Mensagem = "Email/Usuário já cadastrado!";
+                    return response;
+                }
+
+                _senhaInterface.CriarSenhaHash(usuarioCriacaoDto.Senha, out byte[] senhaHash, out byte[] senhaSalt);
+
+                UsuarioModel usuario = _mapper.Map<UsuarioModel>(usuarioCriacaoDto);
+
+                usuario.SenhaHash = senhaHash;
+                usuario.SenhaSalt = senhaSalt;
+
+                _context.Add(usuario);
+                await _context.SaveChangesAsync();
+
+                response.Mensagem = $"Usuário {usuario.Nome} cadastrado com sucesso!";
+                response.Dados = usuario;
                 return response;
             }
             catch (Exception ex)
@@ -93,6 +168,18 @@ namespace WebApiUser.Services.Usuario
                 return response;
             }
 
+        }
+
+        private bool VerificaSeExisteEmailUsuarioRepetidos(UsuarioCriacaoDto usuarioCriacaoDto)
+        {
+            var usuario = _context.Usuarios.FirstOrDefault(item => item.Email == usuarioCriacaoDto.Email || item.Usuario == usuarioCriacaoDto.Usuario);
+
+            if (usuario != null)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
