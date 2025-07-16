@@ -1,4 +1,7 @@
-﻿using System.Security.Cryptography;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 using WebApiUser.Models;
 
 namespace WebApiUser.Services.Senha
@@ -23,7 +26,24 @@ namespace WebApiUser.Services.Senha
 
         public string CriarToken(UsuarioModel usuario)
         {
-            throw new NotImplementedException();
+            List<Claim> claims = new List<Claim>()
+            {
+                new Claim("Email", usuario.Email),
+                new Claim("Username", usuario.Usuario)
+            };
+
+            var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));
+
+            var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: cred
+                );
+
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
         }
 
         public bool VerificaSenhaHash(string senha, byte[] senhaHash, byte[] senhaSalt)

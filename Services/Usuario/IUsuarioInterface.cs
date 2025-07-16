@@ -1,4 +1,5 @@
-﻿using WebApiUser.Dtos.Usuario;
+﻿using WebApiUser.Dtos.Login;
+using WebApiUser.Dtos.Usuario;
 using WebApiUser.Models;
 
 namespace WebApiUser.Services.Usuario
@@ -10,5 +11,6 @@ namespace WebApiUser.Services.Usuario
         Task<ResponseModel<UsuarioModel>> RemoverUsuario(int id);
         Task<ResponseModel<UsuarioModel>> RegistrarUsuario(UsuarioCriacaoDto criacaoCriacaoDto);
         Task<ResponseModel<UsuarioModel>> EditarUsuario(UsuarioEdicaoDto usuarioEdicaoDto);
+        Task<ResponseModel<UsuarioModel>> Login(UsuarioLoginDto usuarioLoginDto);
     }
 }

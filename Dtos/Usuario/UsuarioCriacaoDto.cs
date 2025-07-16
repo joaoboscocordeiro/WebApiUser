@@ -12,8 +12,6 @@ namespace WebApiUser.Dtos.Usuario
         public string Sobrenome { get; set; } = string.Empty;
         [Required(ErrorMessage = "Digite o e-mail")]
         public string Email { get; set; } = string.Empty;
-        public DateTime DataCriacao { get; set; } = DateTime.Now;
-        public DateTime DataAlteracao { get; set; } = DateTime.Now;
         [Required(ErrorMessage = "Digite a senha")]
         public string Senha { get; set; } = string.Empty;
         [Required(ErrorMessage = "Confirme a senha"), Compare("Senha", ErrorMessage = "As senhas não são iguais!")]

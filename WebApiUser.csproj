@@ -7,6 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Dtos\NovaPasta1\**" />
+    <Compile Remove="Dtos\NovaPasta\**" />
+    <Content Remove="Dtos\NovaPasta1\**" />
+    <Content Remove="Dtos\NovaPasta\**" />
+    <EmbeddedResource Remove="Dtos\NovaPasta1\**" />
+    <EmbeddedResource Remove="Dtos\NovaPasta\**" />
+    <None Remove="Dtos\NovaPasta1\**" />
+    <None Remove="Dtos\NovaPasta\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.7" />
