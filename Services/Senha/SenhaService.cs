@@ -29,7 +29,8 @@ namespace WebApiUser.Services.Senha
             List<Claim> claims = new List<Claim>()
             {
                 new Claim("Email", usuario.Email),
-                new Claim("Username", usuario.Usuario)
+                new Claim("Username", usuario.Usuario),
+                new Claim("UserId", usuario.Id.ToString()),
             };
 
             var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value));

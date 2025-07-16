@@ -21,6 +21,7 @@ builder.Services.AddScoped<IUsuarioInterface, UsuarioService>();
 builder.Services.AddScoped<ISenhaInterface, SenhaService>();
 builder.Services.AddScoped<IAuditoriaInterface, AuditoriaService>();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {

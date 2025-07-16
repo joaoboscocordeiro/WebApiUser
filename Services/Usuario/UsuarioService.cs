@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
-using Azure;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using WebApiUser.Data;
 using WebApiUser.Dtos.Login;
 using WebApiUser.Dtos.Usuario;
 using WebApiUser.Models;
+using WebApiUser.Services.Auditoria;
 using WebApiUser.Services.Senha;
 
 namespace WebApiUser.Services.Usuario
@@ -14,12 +15,21 @@ namespace WebApiUser.Services.Usuario
         private readonly AppDbContext _context;
         private readonly ISenhaInterface _senhaInterface;
         private readonly IMapper _mapper;
+        private readonly IAuditoriaInterface _auditoriaInterface;
+        private readonly HttpContextAccessor _httpContextAccessor;
 
-        public UsuarioService(AppDbContext context, ISenhaInterface senhaInterface, IMapper mapper)
+        public UsuarioService(
+            AppDbContext context, 
+            ISenhaInterface senhaInterface, 
+            IMapper mapper, 
+            IAuditoriaInterface auditoriaInterface,
+            HttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _senhaInterface = senhaInterface;
             _mapper = mapper;
+            _auditoriaInterface = auditoriaInterface;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<ResponseModel<UsuarioModel>> BuscarUsuarioPorId(int id)
@@ -62,6 +72,8 @@ namespace WebApiUser.Services.Usuario
                     return response;
                 }
 
+                var dadosAntes = JsonConvert.SerializeObject(usuarioDB);
+
                 usuarioDB.Usuario = usuarioEdicaoDto.Usuario;
                 usuarioDB.Nome = usuarioEdicaoDto.Nome;
                 usuarioDB.Sobrenome = usuarioEdicaoDto.Sobrenome;
@@ -73,6 +85,13 @@ namespace WebApiUser.Services.Usuario
 
                 response.Mensagem = $"Usuário {usuarioDB.Nome} editado com sucesso!";
                 response.Dados = usuarioDB;
+
+                var dadosDepois = JsonConvert.SerializeObject(usuarioDB);
+
+                var usuarioId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+
+                await _auditoriaInterface.RegistrarAuditoriaAsync("Atualização", usuarioId, $"Antes: {dadosAntes}, Depois: {dadosDepois}");
+
                 return response;
             }
             catch (Exception ex)
@@ -206,6 +225,13 @@ namespace WebApiUser.Services.Usuario
                 await _context.SaveChangesAsync();
 
                 response.Mensagem = $"Usuários {usuario.Nome} Removido com Sucesso!";
+
+                var dadosAntes = JsonConvert.SerializeObject(usuario);
+
+                var usuarioId = _httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(c => c.Type == "UserId")?.Value;
+
+                await _auditoriaInterface.RegistrarAuditoriaAsync("Remoção", usuarioId, $"Antes: {dadosAntes}");
+
                 return response;
             }
             catch (Exception ex)
