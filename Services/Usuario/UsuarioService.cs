@@ -16,14 +16,14 @@ namespace WebApiUser.Services.Usuario
         private readonly ISenhaInterface _senhaInterface;
         private readonly IMapper _mapper;
         private readonly IAuditoriaInterface _auditoriaInterface;
-        private readonly HttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public UsuarioService(
             AppDbContext context, 
             ISenhaInterface senhaInterface, 
             IMapper mapper, 
             IAuditoriaInterface auditoriaInterface,
-            HttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _senhaInterface = senhaInterface;
